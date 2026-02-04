@@ -13,7 +13,7 @@
     <div class="row mt-4">
       <div class="col-6">
     <form id="frmAlumnos" @submit.prevent="guardarAlumno" @reset.prevent="limpiarFormulario">
-       <div class="card text-bg-secondary mb-3" style="max-width: 36rem;">
+       <div class="card text-bg-secondary mb-3" style="max-width: 38rem;">
             <div class="card-header">REGISTRO DE ALUMNOS</div>
             <div class="card-body">
                 <div class="row p-1">
@@ -52,6 +52,40 @@
                     <div class="col-4">
                        <input placeholder="telefono" required v-model="alumno.telefono" type="text" class="form-control"> </div>
                 </div>
+                <div class="row p-1">
+                    <div class="col-3">
+                        MUNICIPIO:
+                    </div>
+                    <div class="col-6">
+                        <input placeholder="municipio" required v-model="alumno.municipio" type="text" class="form-control"> </div>
+                </div>
+                <div class="row p-1">
+                    <div class="col-3">
+                        DEPARTAMENTO:
+                    </div>
+                    <div class="col-6">
+                        <input placeholder="departamento" required v-model="alumno.departamento" type="text" class="form-control"> </div>
+                </div>
+                <div class="row p-1">
+                    <div class="col-3">
+                        FECHA DE NACIMIENTO:
+                    </div>
+                    <div class="col-6">
+                        <input placeholder="fechaNacimiento" required v-model="alumno.fechaNacimiento" type="date" class="form-control"> </div>
+                </div>
+                <div class="row p-1">
+                    <div class="col-3">
+                        SEXO:
+                    </div>
+                    <div class="col-4">
+                        <select required v-model="alumno.sexo" class="form-control">
+                            <option value="" disabled>Seleccione</option>
+                            <option value="M">Masculino</option>
+                            <option value="F">Femenino</option>
+                        </select>
+                    </div>
+                </div>
+
             </div>
             <div class="card-footer">
                 <div class="row">
@@ -70,7 +104,7 @@
             <table class="table table-success table-striped" id="tblAlumnos">
     <thead>
         <tr> 
-            <th colspan = "6">
+            <th colspan = "8">
                 <input autocomplete="off" type=" search"
                  <input autocomplete="off" type="search" @keyup="obtenerAlumnos()" v-model="buscar" placeholder="Buscar alumno" class="form-control"></th>
         </tr>       
@@ -80,6 +114,13 @@
             <th scope="col">DIRECCION</th>
             <th scope="col">EMAIL</th>
             <th scope="col">TELEFONO</th>
+            <th scope="col">MUNICIPIOS</th>
+            <th scope="col">DEPARTAMENTO</th>
+            <th scope="col">FECHA DE NACIMIENTO</th>
+            <th scope="col">SEXO</th>
+
+            
+
                </tr>
            </thead>
              <tbody>
@@ -89,6 +130,10 @@
                             <td>{{ alumno.direccion }}</td>
                             <td>{{ alumno.email }}</td>
                             <td>{{ alumno.telefono }}</td>
+                            <td>{{ alumno.municipio }}</td>
+                            <td>{{ alumno.departamento }}</td>
+                            <td>{{ alumno.fechaNacimiento }}</td>
+                            <td>{{ alumno.sexo }}</td>
                             <td>
                                 <button class="btn btn-danger" @click="eliminarAlumno(alumno.id, $event)">DEL</button>
                             </td>

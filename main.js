@@ -8,7 +8,11 @@ createApp({
                 nombre:"",
                 direccion:"",
                 email:"",
-                telefono:""
+                telefono:"",
+                municipio:"",
+                departamento:"",
+                fechaNacimiento:"",
+                sexo:""
             },
             accion:'nuevo',
             id:0,
@@ -47,6 +51,10 @@ createApp({
             this.alumno.direccion = alumno.direccion;
             this.alumno.email = alumno.email;
             this.alumno.telefono = alumno.telefono;
+            this.alumno.municipio = alumno.municipio;
+            this.alumno.departamento = alumno.departamento;
+            this.alumno.fechaNacimiento = alumno.fechaNacimiento;
+            this.alumno.sexo = alumno.sexo;
         },
         guardarAlumno() {
             let datos = {
@@ -55,7 +63,11 @@ createApp({
                 nombre: this.alumno.nombre,
                 direccion: this.alumno.direccion,
                 email: this.alumno.email,
-                telefono: this.alumno.telefono
+                telefono: this.alumno.telefono,
+                municipio: this.alumno.municipio,
+                departamento: this.alumno.departamento,
+                fechaNacimiento: this.alumno.fechaNacimiento,
+                sexo: this.alumno.sexo
             }, codigoDuplicado = this.buscarAlumno(datos.codigo);
             if(codigoDuplicado && this.accion=='nuevo'){
                 alert("El codigo del alumno ya existe, "+ codigoDuplicado.nombre);
@@ -76,6 +88,10 @@ createApp({
             this.alumno.direccion = '';
             this.alumno.email = '';
             this.alumno.telefono = '';
+            this.alumno.municipio = '';
+            this.alumno.departamento = '';
+            this.alumno.fechaNacimiento = '';
+            this.alumno.sexo = '';
         },
         buscarAlumno(codigo=''){
             let n = localStorage.length;
