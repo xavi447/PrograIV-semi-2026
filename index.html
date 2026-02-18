@@ -35,6 +35,14 @@
 
             <docentes @buscar='buscar("busqueda_docentes","obtenerDocentes")' :forms="forms" ref="docentes" v-show="forms.docentes.mostrar"></docentes>
             <busqueda_docentes @modificar='modificar("docentes","modificarDocente", $event)' ref="busqueda_docentes" v-show="forms.busqueda_docentes.mostrar"></busqueda_docentes>
+                <matriculas @buscar='buscar("busqueda_matriculas","obtenerMatriculas")' :forms="forms" ref="matriculas" v-show="forms.matriculas.mostrar"></matriculas>
+            <busqueda_matriculas @modificar='modificar("matriculas","modificarMatricula", $event)' ref="busqueda_matriculas" v-show="forms.busqueda_matriculas.mostrar"></busqueda_matriculas>
+       <inscripciones @buscar='buscar("busqueda_inscripciones","obtenerInscripciones")' 
+    :forms="forms" ref="inscripciones" v-show="forms.inscripciones.mostrar">
+</inscripciones>
+<busqueda_inscripciones @modificar='modificar("inscripciones","modificarInscripcion", $event)' 
+    ref="busqueda_inscripciones" v-show="forms.busqueda_inscripciones.mostrar">
+</busqueda_inscripciones>
         </div>
     </div>
     <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
@@ -49,6 +57,10 @@
     <script src="componentes/busqueda_materias.js"></script>
     <script src="componentes/docentes.js"></script>
     <script src="componentes/busqueda_docentes.js"></script>
+    <script src="componentes/matriculas.js"></script>
+    <script src="componentes/busqueda_matriculas.js"></script>
+    <script src="componentes/inscripciones.js"></script>
+    <script src="componentes/busqueda_inscripciones.js"></script>
     <script src="main.js"></script>
 </body>
 </html>
