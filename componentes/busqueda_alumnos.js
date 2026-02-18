@@ -6,7 +6,11 @@ const busqueda_alumnos = {
         }
     },
     methods:{
+        modificarAlumno(alumno){
+            this.$emit('modificar', alumno);
+        },
         async obtenerAlumnos(){
+            console.log("hola");
             this.alumnos = await db.alumnos.filter(
                 alumno => alumno.codigo.toLowerCase().includes(this.buscar.toLowerCase()) 
                     || alumno.nombre.toLowerCase().includes(this.buscar.toLowerCase())
@@ -23,7 +27,7 @@ const busqueda_alumnos = {
     template: `
         <div class="row">
             <div class="col-6">
-                <table class="table table-striped table-hover" id="tblAlumnos">
+                <table class="table table-success table-striped" id="tblAlumnos">
                     <thead>
                         <tr>
                             <th colspan="6">
@@ -36,6 +40,11 @@ const busqueda_alumnos = {
                             <th>DIRECCION</th>
                             <th>EMAIL</th>
                             <th>TELEFONO</th>
+                            <th>MUNICIPIO</th>
+                            <th>DEPARTAMENTO</th>
+                            <th>FECHA DE NACIMIENTO</th>
+                            <th>SEXO</th>
+
                             <th></th>
                         </tr>
                     </thead>
@@ -46,6 +55,10 @@ const busqueda_alumnos = {
                             <td>{{ alumno.direccion }}</td>
                             <td>{{ alumno.email }}</td>
                             <td>{{ alumno.telefono }}</td>
+                            <td>{{ alumno.municipio }}</td>
+                            <td>{{ alumno.departamento }}</td>
+                            <td>{{ alumno.fecha_de_nacimiento }}</td>
+                            <td>{{ alumno.sexo }}</td>
                             <td>
                                 <button class="btn btn-danger" @click="eliminarAlumno(alumno.idAlumno, $event)">DEL</button>
                             </td>

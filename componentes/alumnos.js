@@ -1,4 +1,5 @@
 const alumnos = {
+    props:['forms'],
     data(){
         return{
             alumno:{
@@ -7,13 +8,22 @@ const alumnos = {
                 nombre:"",
                 direccion:"",
                 email:"",
-                telefono:""
+                telefono:"",
+                municipio:"",
+                departamento:"",
+                fecha_de_nacimiento:"",
+                sexo:""
             },
             accion:'nuevo',
             idAlumno:0,
+            data_alumnos:[]
         }
     },
     methods:{
+        buscarAlumno(){
+            this.forms.busqueda_alumnos.mostrar = !this.forms.busqueda_alumnos.mostrar;
+            this.$emit('buscar');
+        },
         modificarAlumno(alumno){
             this.accion = 'modificar';
             this.idAlumno = alumno.idAlumno;
@@ -22,6 +32,10 @@ const alumnos = {
             this.alumno.direccion = alumno.direccion;
             this.alumno.email = alumno.email;
             this.alumno.telefono = alumno.telefono;
+            this.alumno.municipio = alumno.municipio;
+            this.alumno.departamento = alumno.departamento;
+            this.alumno.fecha_de_nacimiento = alumno.fecha_de_nacimiento;
+            this.alumno.sexo = alumno.sexo;
         },
         async guardarAlumno() {
             let datos = {
@@ -30,18 +44,22 @@ const alumnos = {
                 nombre: this.alumno.nombre,
                 direccion: this.alumno.direccion,
                 email: this.alumno.email,
-                telefono: this.alumno.telefono
+                telefono: this.alumno.telefono,
+                municipio: this.alumno.municipio,
+                departamento: this.alumno.departamento,
+                fecha_de_nacimiento: this.alumno.fecha_de_nacimiento,
+                sexo: this.alumno.sexo
             };
             this.buscar = datos.codigo;
-            await this.obtenerAlumnos();
+            //await this.obtenerAlumnos();
 
-            if(this.alumnos.length > 0 && this.accion=='nuevo'){
-                alert("El codigo del alumno ya existe, "+ this.alumnos[0].nombre);
+            if(this.data_alumnos.length > 0 && this.accion=='nuevo'){
+                alert("El codigo del alumno ya existe, "+ this.data_alumnos[0].nombre);
                 return; //Termina la ejecucion de la funcion
             }
             db.alumnos.put(datos);
             this.limpiarFormulario();
-            this.obtenerAlumnos();
+            //this.obtenerAlumnos();
         },
         getId(){
             return new Date().getTime();
@@ -54,13 +72,18 @@ const alumnos = {
             this.alumno.direccion = '';
             this.alumno.email = '';
             this.alumno.telefono = '';
+            this.alumno.municipio = '';
+            this.alumno.departamento = '';
+            this.alumno.fecha_de_nacimiento = '';
+            this.alumno.sexo = '';
+
         },
     },
     template: `
         <div class="row">
             <div class="col-6">
                 <form id="frmAlumnos" @submit.prevent="guardarAlumno" @reset.prevent="limpiarFormulario">
-                    <div class="card text-bg-dark mb-3" style="max-width: 36rem;">
+                   <div class="card text-bg-secondary mb-3" style="max-width: 38rem;">
                         <div class="card-header">REGISTRO DE ALUMNOS</div>
                         <div class="card-body">
                             <div class="row p-1">
@@ -103,12 +126,49 @@ const alumnos = {
                                     <input placeholder="telefono" required v-model="alumno.telefono" type="text" class="form-control">
                                 </div>
                             </div>
+                            <div class="row p-1">
+                                <div class="col-3">
+                                    MUNICIPIO:
+                                </div>
+                                <div class="col-6">
+                                    <input placeholder="municipio" required v-model="alumno.municipio" type="text" class="form-control">
+                                </div>
+                            </div>
+                            <div class="row p-1">
+                                <div class="col-3">
+                                    DEPARTAMENTO:
+                                </div>
+                                <div class="col-6">
+                                    <input placeholder="departamento" required v-model="alumno.departamento" type="text" class="form-control">
+                                </div>
+                            </div>
+                            <div class="row p-1">
+                                <div class="col-3">
+                                    FECHA DE NACIMIENTO:
+                                </div>
+                                <div class="col-6">
+                                    <input placeholder="fecha de nacimiento" required v-model="alumno.fecha_de_nacimiento" type="date" class="form-control">
+                                </div>
+                            </div>
+                            <div class="row p-1">
+                                <div class="col-3">
+                                    SEXO:
+                                </div>
+                                <div class="col-6">
+                                    <select required v-model="alumno.sexo" class="form-select">
+                                        <option value="">Seleccionar sexo</option>
+                                        <option value="Masculino">Masculino</option>
+                                        <option value="Femenino">Femenino</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-footer">
                             <div class="row">
                                 <div class="col text-center">
                                     <button type="submit" id="btnGuardarAlumno" class="btn btn-primary">GUARDAR</button>
                                     <button type="reset" id="btnCancelarAlumno" class="btn btn-warning">NUEVO</button>
+                                    <button type="button" @click="buscarAlumno" id="btnBuscarAlumno" class="btn btn-success">BUSCAR</button>
                                 </div>
                             </div>
                         </div>
