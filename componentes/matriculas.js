@@ -9,6 +9,7 @@ data(){
             idDocente:'',
             fecha_matricula:'',
             nombre_materia:'',
+            hash:'',
         },
         accion:'nuevo',
         idMatricula:0,
@@ -47,6 +48,7 @@ methods:{
             fecha_matricula: this.matricula.fecha_matricula,            
             nombre_materia: this.matricula.nombre_materia,
         };
+        datos.hash=sha256(JSON.stringify(datos));
         this.buscar = datos.idMatricula;
         //await this.obtenerMatriculas();
 

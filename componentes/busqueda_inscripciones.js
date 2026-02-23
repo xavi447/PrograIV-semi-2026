@@ -38,7 +38,7 @@ const busqueda_inscripciones = {
         <div>
             <div class="row mb-2">
                 <div class="col-6">
-                    <input v-model="buscar" type="text" class="form-control" placeholder="Buscar por nombre, DUI, carrera, ciclo...">
+                    <input v-model="buscar" type="text" class="form-control" placeholder="Buscar inscripcion">
                 </div>
                 <div class="col-6">
                     <button @click="obtenerInscripciones" class="btn btn-primary">Buscar</button>
@@ -54,7 +54,7 @@ const busqueda_inscripciones = {
                                 <th>CARRERA</th>
                                 <th>CICLO/PERIODO</th>
                                 <th>FECHA INSCRIPCIÓN</th>
-                                <th>ESTADO</th>
+                                <th>HASH</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -65,11 +65,8 @@ const busqueda_inscripciones = {
                                 <td>{{ inscripcion.carrera }}</td>
                                 <td>{{ inscripcion.ciclo_periodo }}</td>
                                 <td>{{ inscripcion.fecha_inscripcion }}</td>
-                                <td>
-                                    <span :class="inscripcion.estado === 'activo' ? 'badge bg-success' : 'badge bg-danger'">
-                                        {{ inscripcion.estado }}
-                                    </span>
-                                </td>
+                                <td>{{ inscripcion.hash }}</td>
+                                
                                 <td>
                                     <button class="btn btn-danger btn-sm" @click.stop="eliminarInscripcion(inscripcion, $event)">DEL</button>
                                 </td>

@@ -12,7 +12,8 @@ const alumnos = {
                 municipio:"",
                 departamento:"",
                 fecha_de_nacimiento:"",
-                sexo:""
+                sexo:"",
+                hash:""
             },
             accion:'nuevo',
             idAlumno:0,
@@ -50,6 +51,7 @@ const alumnos = {
                 fecha_de_nacimiento: this.alumno.fecha_de_nacimiento,
                 sexo: this.alumno.sexo
             };
+            datos.hash=sha256(JSON.stringify(datos));
             this.buscar = datos.codigo;
             //await this.obtenerAlumnos();
 

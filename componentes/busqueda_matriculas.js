@@ -51,6 +51,7 @@ const busqueda_matriculas = {
                                 <th>MATERIA</th>
                                 <th>DOCENTE</th>
                                 <th>FECHA DE MATRICULA</th>
+                                <th>HASH</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -60,6 +61,7 @@ const busqueda_matriculas = {
                                 <td>{{ matricula.idMateria }} - {{ matricula.nombre_materia }}</td>
                                 <td>{{ matricula.idDocente }} - {{ matricula.nombre_docente }}</td>
                                 <td>{{ matricula.fecha_matricula }}</td>
+                                <td>{{ matricula.hash }}</td>
                                 <td>
                                     <button class="btn btn-danger" @click.stop="eliminarMatricula(matricula, $event)">DEL</button>
                                 </td>

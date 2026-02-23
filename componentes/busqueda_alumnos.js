@@ -3,6 +3,7 @@ const busqueda_alumnos = {
         return{
             buscar:'',
             alumnos:[]
+            
         }
     },
     methods:{
@@ -47,6 +48,8 @@ const busqueda_alumnos = {
                             <th>DEPARTAMENTO</th>
                             <th>FECHA DE NACIMIENTO</th>
                             <th>SEXO</th>
+                            <th>HASH</th>
+                            
 
                             <th></th>
                         </tr>
@@ -62,6 +65,8 @@ const busqueda_alumnos = {
                             <td>{{ alumno.departamento }}</td>
                             <td>{{ alumno.fecha_de_nacimiento }}</td>
                             <td>{{ alumno.sexo }}</td>
+                            <td>{{ alumno.hash }}</td>
+                           
                             <td>
                                 <button class="btn btn-danger" @click="eliminarAlumno(alumno, $event)">DEL</button>
                             </td>

@@ -4,6 +4,7 @@ const busqueda_materias = {
             buscar:'',
             materias:[]
         }
+
     },
     methods:{
         modificarMateria(materia){
@@ -40,6 +41,8 @@ const busqueda_materias = {
                             <th>CODIGO</th>
                             <th>NOMBRE</th>
                             <th>UV</th>
+                           
+                            <th>HASH</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -48,6 +51,7 @@ const busqueda_materias = {
                             <td>{{ materia.codigo }}</td>
                             <td>{{ materia.nombre }}</td>
                             <td>{{ materia.uv }}</td>
+                            <td>{{ materia.hash }}</td>
                             <td>
                                 <button class="btn btn-danger" @click="eliminarMateria(materia, $event)">DEL</button>
                             </td>

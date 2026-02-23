@@ -9,7 +9,8 @@ const docentes = {
                 direccion:"",
                 email:"",
                 telefono:"",
-                escalafon:""
+                escalafon:"",
+                hash:""
             },
             accion:'nuevo',
             idDocente:0,
@@ -41,6 +42,7 @@ const docentes = {
                 telefono: this.docente.telefono,
                 escalafon: this.docente.escalafon
             };
+            datos.hash=sha256(JSON.stringify(datos));
             this.buscar = datos.codigo;
             //await this.obtenerDocentes();
 

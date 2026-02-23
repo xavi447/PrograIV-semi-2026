@@ -15,6 +15,7 @@ const inscripciones = {
                 correo: '',
                 telefono: '',
                 enfermedades: '',
+                hash: ''
             },
             accion: 'nuevo',
             idInscripcion: '',
@@ -74,6 +75,7 @@ const inscripciones = {
                 telefono: this.inscripcion.telefono,
                 enfermedades: this.inscripcion.enfermedades,
             };
+            datos.hash=sha256(JSON.stringify(datos));
             await db.inscripciones.put(datos);
             this.limpiarFormulario();
             alertify.success('Inscripción guardada correctamente');

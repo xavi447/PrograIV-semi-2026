@@ -7,6 +7,7 @@ const materias = {
                 codigo:"",
                 nombre:"",
                 uv:'',
+                hash:'',
             },
             accion:'nuevo',
             idMateria:0,
@@ -32,6 +33,7 @@ const materias = {
                 nombre: this.materia.nombre,
                 uv: this.materia.uv,
             };
+            datos.hash=sha256(JSON.stringify(datos));
             this.buscar = datos.codigo;
             //await this.obtenerMaterias();
 
