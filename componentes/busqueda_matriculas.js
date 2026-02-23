@@ -10,27 +10,19 @@ const busqueda_matriculas = {
         modificarMatricula(matricula){
             this.$emit('modificar', matricula);
         },
-   
-    async obtenerMatriculas(){
-        this.matriculas = await db.matriculas.filter(
-                matricula => matricula.idAlumno.toString().includes(this.buscar) || 
-                    matricula.idMateria.toString().includes(this.buscar) ||
-                    matricula.idDocente.toString().includes(this.buscar) ||
-                    matricula.fecha_matricula.toString().includes(this.buscar) ||
-                    matricula.nombre_materia.toLowerCase().includes(this.buscar.toLowerCase())
-            ).toArray();
+        async obtenerMatriculas(){
+            this.matriculas = await db.matriculas
+                .filter(matricula =>
+                    matricula.codigo_alumno?.toString().includes(this.buscar) ||
+                    matricula.ciclo_periodo?.toLowerCase().includes(this.buscar.toLowerCase())
+                )
+                .toArray();
         },
-
-    async eliminarMatricula(matricula, e){
+        async eliminarMatricula(matricula, e){
             e.stopPropagation();
-            alertify.confirm('Elimanar matricula', `¿Está seguro de eliminar la matricula ${matricula.nombre_materia}?`, async e=>{
-                await db.matriculas.delete(matricula.idMatricula);
-                this.obtenerMatriculas();
-                alertify.success(`Matricula ${matricula.nombre_materia} eliminada correctamente`);
-            }, () => {
-                //No hacer nada
-            });
-        },
+            await db.matriculas.delete(matricula.idMatricula);
+            this.obtenerMatriculas();
+        }
     },
     template:  
         `<div>
@@ -48,19 +40,15 @@ const busqueda_matriculas = {
                         <thead>
                             <tr>
                                 <th>ALUMNO</th>
-                                <th>MATERIA</th>
-                                <th>DOCENTE</th>
-                                <th>FECHA DE MATRICULA</th>
+                                <th>CICLO</th>
                                 <th>HASH</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="matricula in matriculas" :key="matricula.idMatricula" @click="modificarMatricula(matricula)">
-                                <td>{{ matricula.idAlumno }} - {{ matricula.nombre_alumno }}</td>
-                                <td>{{ matricula.idMateria }} - {{ matricula.nombre_materia }}</td>
-                                <td>{{ matricula.idDocente }} - {{ matricula.nombre_docente }}</td>
-                                <td>{{ matricula.fecha_matricula }}</td>
+                                <td>{{ matricula.codigo_alumno }}</td>
+                                <td>{{ matricula.ciclo_periodo }}</td>
                                 <td>{{ matricula.hash }}</td>
                                 <td>
                                     <button class="btn btn-danger" @click.stop="eliminarMatricula(matricula, $event)">DEL</button>

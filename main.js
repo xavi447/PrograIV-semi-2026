@@ -1,7 +1,15 @@
 const { createApp } = Vue,
     Dexie = window.Dexie,
-    db = new Dexie("db_academica"),
     sha256 = CryptoJS.SHA256;
+
+     window.db = new Dexie("db_academica");
+    window.db.version(2).stores({
+        alumnos: "++idAlumno,codigo,nombre,direccion,email,telefono,municipio,departamento,fecha_de_nacimiento,sexo,hash",
+        materias: "++idMateria,codigo,nombre,uv,hash",
+        docentes: "++idDocente,codigo,nombre,direccion,email,telefono,escalafon,hash",
+        matriculas: "++idMatricula,codigo_alumno,ciclo_periodo,hash",
+        inscripciones: "++idInscripcion,codigo_alumno,codigo_materia,fecha_inscripcion,ciclo_periodo,hash",
+    });
 
 createApp({
     components:{
@@ -44,13 +52,5 @@ createApp({
             this.$refs[ventana][metodo](data);
         }
     },
-    mounted(){
-        db.version(1).stores({
-            "alumnos": "idAlumno, codigo, nombre, direccion, email, telefono",
-            "materias": "idMateria, codigo, nombre, uv",
-            "docentes": "idDocente, codigo, nombre, direccion, email, telefono, escalafon",
-            "matriculas": "idMatricula, idAlumno, idMateria, idDocente, fecha_matricula, nombre_materia",
-            "inscripciones": "idInscripcion, idAlumno, nombre_alumno, dui, fecha_inscripcion, ciclo_periodo, carrera, estado"
-        });
-    }
+   
 }).mount("#app");

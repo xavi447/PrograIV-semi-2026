@@ -1,150 +1,199 @@
 const inscripciones = {
     props: ['forms'],
+
     data() {
         return {
             inscripcion: {
                 idInscripcion: '',
-                idAlumno: '',
+                codigo_alumno: '',
                 nombre_alumno: '',
+                codigo_materia: '',
+                nombre_materia: '',
+                uv: 0,
                 fecha_inscripcion: '',
                 ciclo_periodo: '',
-                carrera: '',
-                estado: 'activo',
-                dui: '',
-                sexo: '',
-                correo: '',
-                telefono: '',
-                enfermedades: '',
+                estado: 'inscrito',
+                observaciones: '',
                 hash: ''
             },
+            materias: [],
             accion: 'nuevo',
             idInscripcion: '',
         }
     },
+
+    mounted() {
+        this.cargarMaterias();
+    },
+
     methods: {
+
+        async cargarMaterias() {
+            this.materias = await db.materias.toArray();
+        },
+
         buscarInscripcion() {
-            this.forms.busqueda_inscripciones.mostrar = !this.forms.busqueda_inscripciones.mostrar;
+            this.forms.busqueda_inscripciones.mostrar =
+                !this.forms.busqueda_inscripciones.mostrar;
             this.$emit('buscar');
         },
+
         modificarInscripcion(inscripcion) {
             this.accion = 'modificar';
             this.idInscripcion = inscripcion.idInscripcion;
-            this.inscripcion.idAlumno = inscripcion.idAlumno;
-            this.inscripcion.nombre_alumno = inscripcion.nombre_alumno;
-            this.inscripcion.fecha_inscripcion = inscripcion.fecha_inscripcion;
-            this.inscripcion.ciclo_periodo = inscripcion.ciclo_periodo;
-            this.inscripcion.carrera = inscripcion.carrera;
-            this.inscripcion.estado = inscripcion.estado;
-            this.inscripcion.dui = inscripcion.dui;
-            this.inscripcion.sexo = inscripcion.sexo;
-            this.inscripcion.correo = inscripcion.correo;
-            this.inscripcion.telefono = inscripcion.telefono;
-            this.inscripcion.enfermedades = inscripcion.enfermedades;
+            Object.assign(this.inscripcion, inscripcion);
         },
+
         limpiarFormulario() {
             this.accion = 'nuevo';
             this.idInscripcion = '';
-            this.inscripcion.idAlumno = '';
-            this.inscripcion.nombre_alumno = '';
-            this.inscripcion.fecha_inscripcion = '';
-            this.inscripcion.ciclo_periodo = '';
-            this.inscripcion.carrera = '';
-            this.inscripcion.estado = 'activo';
-            this.inscripcion.dui = '';
-            this.inscripcion.sexo = '';
-            this.inscripcion.correo = '';
-            this.inscripcion.telefono = '';
-            this.inscripcion.enfermedades = '';
+            this.inscripcion = {
+                idInscripcion: '',
+                codigo_alumno: '',
+                nombre_alumno: '',
+                codigo_materia: '',
+                nombre_materia: '',
+                uv: 0,
+                fecha_inscripcion: '',
+                ciclo_periodo: '',
+                estado: 'inscrito',
+                observaciones: '',
+                hash: ''
+            };
         },
+
+        seleccionarMateria() {
+            let materia = this.materias.find(
+                m => String(m.codigo) === String(this.inscripcion.codigo_materia)
+            );
+
+            if (materia) {
+                this.inscripcion.nombre_materia = materia.nombre;
+                this.inscripcion.uv = parseInt(materia.uv);
+            } else {
+                this.inscripcion.nombre_materia = '';
+                this.inscripcion.uv = 0;
+            }
+        },
+
         async guardarInscripcion() {
-            if (!this.inscripcion.nombre_alumno || !this.inscripcion.fecha_inscripcion || !this.inscripcion.dui) {
-                alertify.error('Por favor complete los campos obligatorios: Nombre, DUI y Fecha');
+
+            if (!this.inscripcion.codigo_alumno ||
+                !this.inscripcion.codigo_materia ||
+                !this.inscripcion.fecha_inscripcion ||
+                !this.inscripcion.ciclo_periodo) {
+
+                alertify.error('Complete todos los campos obligatorios');
                 return;
             }
+
+            
+            let alumno = await db.alumnos
+                .filter(a => a.codigo === this.inscripcion.codigo_alumno)
+                .toArray();
+
+            if (alumno.length === 0) {
+                alertify.error('El alumno no está matriculado');
+                return;
+            }
+
+            this.inscripcion.nombre_alumno = alumno[0].nombre;
+
+            let duplicado = await db.inscripciones
+                .filter(i =>
+                    i.codigo_alumno === this.inscripcion.codigo_alumno &&
+                    i.codigo_materia === this.inscripcion.codigo_materia &&
+                    i.ciclo_periodo === this.inscripcion.ciclo_periodo
+                ).toArray();
+
+            if (duplicado.length > 0 && this.accion === 'nuevo') {
+                alertify.error('Esta materia ya fue inscrita en este ciclo');
+                return;
+            }
+
+            let inscritas = await db.inscripciones
+                .filter(i =>
+                    i.codigo_alumno === this.inscripcion.codigo_alumno &&
+                    i.ciclo_periodo === this.inscripcion.ciclo_periodo
+                ).toArray();
+
+            let totalUV = inscritas.reduce(
+                (acc, item) => acc + parseInt(item.uv || 0),
+                0
+            );
+
+            totalUV += parseInt(this.inscripcion.uv);
+
+            if (totalUV > 20) {
+                alertify.error('No puede inscribir más de 20 UV por ciclo');
+                return;
+            }
+
             let datos = {
-                idInscripcion: this.accion == 'modificar' ? this.idInscripcion : this.getId(),
-                idAlumno: this.accion == 'modificar' ? this.idInscripcion : this.getId(),
-                nombre_alumno: this.inscripcion.nombre_alumno,
-                fecha_inscripcion: this.inscripcion.fecha_inscripcion,
-                ciclo_periodo: this.inscripcion.ciclo_periodo,
-                carrera: this.inscripcion.carrera,
-                estado: this.inscripcion.estado,
-                dui: this.inscripcion.dui,
-                sexo: this.inscripcion.sexo,
-                correo: this.inscripcion.correo,
-                telefono: this.inscripcion.telefono,
-                enfermedades: this.inscripcion.enfermedades,
+                idInscripcion: this.accion === 'modificar'
+                    ? this.idInscripcion
+                    : this.getId(),
+                ...this.inscripcion
             };
-            datos.hash=sha256(JSON.stringify(datos));
+
+            datos.hash = sha256(JSON.stringify(datos));
+
             await db.inscripciones.put(datos);
+
             this.limpiarFormulario();
-            alertify.success('Inscripción guardada correctamente');
+            alertify.success('Materia inscrita correctamente');
         },
+
         getId() {
             return new Date().getTime();
-        },
+        }
     },
+
+   
+
+
     template: `
         <div class="row">
             <div class="col-8">
                 <div class="card text-bg-secondary mb-3">
-                    <div class="card-header">INSCRIPCIÓN DE NUEVO INGRESO</div>
+                    <div class="card-header">INSCRIPCIÓN DE MATERIAS</div>
                     <div class="card-body">
 
                         <div class="row p-1">
-                            <div class="col-3">NOMBRE ALUMNO: <span class="text-danger">*</span></div>
-                            <div class="col-8">
-                                <input v-model="inscripcion.nombre_alumno" type="text" class="form-control">
+                            <div class="col-3">CÓDIGO ALUMNO: *</div>
+                            <div class="col-4">
+                                <input v-model="inscripcion.codigo_alumno" type="text" class="form-control">
                             </div>
                         </div>
 
                         <div class="row p-1">
-                            <div class="col-3">DUI: <span class="text-danger">*</span></div>
-                            <div class="col-4">
-                                <input v-model="inscripcion.dui" type="text" class="form-control">
-                            </div>
-                            <div class="col-2">SEXO:</div>
-                            <div class="col-3">
-                                <select v-model="inscripcion.sexo" class="form-control">
-                                    <option value="">-- Seleccione --</option>
-                                    <option value="M">Masculino</option>
-                                    <option value="F">Femenino</option>
+                            <div class="col-3">MATERIA: *</div>
+                            <div class="col-6">
+                                <select v-model="inscripcion.codigo_materia"
+                                        @change="seleccionarMateria"
+                                        class="form-control"
+                                        :disabled="materias.length === 0">
+                                    <option value="">-- Seleccione Materia --</option>
+                                    <option v-for="m in materias"
+                                            :key="m.idMateria"
+                                            :value="m.codigo">
+                                        {{ m.codigo }} - {{ m.nombre }} ({{ m.uv }} UV)
+                                    </option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="row p-1">
-                            <div class="col-3">CORREO:</div>
-                            <div class="col-8">
-                                <input v-model="inscripcion.correo" type="email" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="row p-1">
-                            <div class="col-3">TELÉFONO:</div>
-                            <div class="col-4">
-                                <input v-model="inscripcion.telefono" type="text" class="form-control" >
-                            </div>
-                        </div>
-
-                        <div class="row p-1">
-                            <div class="col-3">FECHA INSCRIPCIÓN: <span class="text-danger">*</span></div>
+                            <div class="col-3">FECHA INSCRIPCIÓN: *</div>
                             <div class="col-4">
                                 <input v-model="inscripcion.fecha_inscripcion" type="date" class="form-control">
                             </div>
                         </div>
 
                         <div class="row p-1">
-                            <div class="col-3">CICLO/PERIODO:</div>
+                            <div class="col-3">CICLO/PERIODO: *</div>
                             <div class="col-4">
                                 <input v-model="inscripcion.ciclo_periodo" type="text" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="row p-1">
-                            <div class="col-3">CARRERA/PROGRAMA:</div>
-                            <div class="col-8">
-                                <input v-model="inscripcion.carrera" type="text" class="form-control">
                             </div>
                         </div>
 
@@ -152,16 +201,17 @@ const inscripciones = {
                             <div class="col-3">ESTADO:</div>
                             <div class="col-4">
                                 <select v-model="inscripcion.estado" class="form-control">
-                                    <option value="activo">Activo</option>
-                                    <option value="inactivo">Inactivo</option>
+                                    <option value="inscrito">Inscrito</option>
+                                    <option value="retirado">Retirado</option>
+                                    <option value="aprobado">Aprobado</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="row p-1">
-                            <div class="col-3">ENFERMEDADES / ALERGIAS:</div>
+                            <div class="col-3">OBSERVACIONES:</div>
                             <div class="col-8">
-                                <textarea v-model="inscripcion.enfermedades" class="form-control" rows="2"></textarea>
+                                <textarea v-model="inscripcion.observaciones" class="form-control" rows="2"></textarea>
                             </div>
                         </div>
 

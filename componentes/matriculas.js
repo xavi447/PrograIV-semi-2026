@@ -1,72 +1,52 @@
 const matriculas = {
-props :['forms'],
-data(){
-    return{
-        matricula:{
-            idMatricula:'',
-            idAlumno:'',
-            idMateria:'',
-            idDocente:'',
-            fecha_matricula:'',
-            nombre_materia:'',
-            hash:'',
-        },
-        accion:'nuevo',
-        idMatricula:0,
-        data_matriculas:[],
-    }
-},
-methods:{
-    buscarMatricula(){
-        this.forms.busqueda_matriculas.mostrar = !this.forms.busqueda_matriculas.mostrar;
-        this.$emit('buscar');
-    },
-    modificarMatricula(matricula){
-        this.accion = 'modificar';
-        this.idMatricula = matricula.idMatricula;
-        this.matricula.idAlumno = matricula.idAlumno;
-        this.matricula.idMateria = matricula.idMateria;
-        this.matricula.idDocente = matricula.idDocente;
-        this.matricula.fecha_matricula = matricula.fecha_matricula;
-        this.matricula.nombre_materia = matricula.nombre_materia;
-    },
-    limpiarFormulario(){
-        this.accion = 'nuevo';
-        this.idMatricula = '';
-        this.matricula.idAlumno = '';
-        this.matricula.idMateria = '';
-        this.matricula.idDocente = '';
-        this.matricula.fecha_matricula = '';
-        this.matricula.nombre_materia = '';
-    },
-    async guardarMatricula() {
-        let datos = {
-            idMatricula: this.accion=='modificar' ? this.idMatricula : this.getId(),
-            idAlumno: this.matricula.idAlumno,
-            idMateria: this.matricula.idMateria,
-            idDocente: this.matricula.idDocente,
-            fecha_matricula: this.matricula.fecha_matricula,            
-            nombre_materia: this.matricula.nombre_materia,
-        };
-        datos.hash=sha256(JSON.stringify(datos));
-        this.buscar = datos.idMatricula;
-        //await this.obtenerMatriculas();
-
-        if(this.data_matriculas.length > 0 && this.accion=='nuevo'){
-            alertify.error(`El alumno ya esta matriculado en la materia ${this.data_matriculas[0].nombre_materia}`);
-            return; //Termina la ejecucion de la funcion
+    props:['forms'],
+    data(){
+        return{
+            matricula:{
+                idMatricula:'',
+                codigo_alumno:'',
+                ciclo_periodo:'',
+                hash:'',
+            },
+            accion:'nuevo',
+            idMatricula:0,
         }
-        db.matriculas.put(datos);
-        this.limpiarFormulario();
-        alertify.success(`Matricula guardada correctamente`);
-        //this.obtenerMatriculas();
     },
-    getId(){
-        return new Date().getTime();
+    methods:{
+        buscarMatricula(){
+    this.forms.busqueda_matriculas.mostrar =
+        !this.forms.busqueda_matriculas.mostrar;
+    this.$emit('buscar');
+        },
+        modificarMatricula(matricula){
+            this.accion = 'modificar';
+            this.idMatricula = matricula.idMatricula;
+            this.matricula.codigo_alumno = matricula.codigo_alumno;
+            this.matricula.ciclo_periodo = matricula.ciclo_periodo;
+        },
+        limpiarFormulario(){
+            this.accion = 'nuevo';
+            this.idMatricula = '';
+            this.matricula.codigo_alumno = '';
+            this.matricula.ciclo_periodo = '';
+        },
+        async guardarMatricula(){
+            let datos = {
+                idMatricula: this.accion=='modificar'
+                    ? this.idMatricula
+                    : new Date().getTime(),
+                codigo_alumno: this.matricula.codigo_alumno,
+                ciclo_periodo: this.matricula.ciclo_periodo
+            };
+
+            datos.hash = sha256(JSON.stringify(datos));
+
+            await db.matriculas.put(datos);
+
+            this.limpiarFormulario();
+            alertify.success("Matricula guardada correctamente");
+        }
     },
-},
-
-
 
 template: `
     <div class="row">
@@ -76,43 +56,22 @@ template: `
                 <div class="card-body">
                     <div class="row p-1">
                         <div class="col-3">
-                            ALUMNO:
+                           CODIGOALUMNO:
                         </div>
                         <div class="col-6">
-                            <input v-model="matricula.idAlumno" type="text" class="form-control">
+                            <input v-model="matricula.codigo_alumno" type="text" class="form-control">
                         </div>
                     </div>
-                    <div class="row p-1">
-                        <div class="col-3">
-                            MATERIA:
-                        </div>
-                        <div class="col-6">
-                            <input v-model="matricula.idMateria" type="text" class="form-control">
-                        </div>
-                    </div>
-                    <div class="row p-1">
-                        <div class="col-3">
-                            DOCENTE:
-                        </div>
-                        <div class="col-6">
-                            <input v-model="matricula.idDocente" type="text" class="form-control">
-                        </div>
-                    </div>
-                    <div class="row p-1">
-                        <div class="col-3">
-                            FECHA:
-                        </div>
-                        <div class="col-6">
-                            <input v-model="matricula.fecha_matricula" type="date" class="form-control">
-                        </div>
-                    </div>
-                    <div class="row p-1">
-                        <div class="col-3">
-                            NOMBRE MATERIA:
-                        </div>
-                        <div class="col-6">
-                            <input v-model="matricula.nombre_materia" type="text" class="form-control">
-                        </div>
+                   <div class="row p-1">
+                            <div class="col-3">Ciclo/Periodo:</div>
+                            <div class="col-4">
+                                <select v-model="matricula.ciclo_periodo" class="form-control">
+                                <option value="" disabled>Seleccione ciclo</option>
+                                    <option value="Ciclo 1-2026">Ciclo 1-2026</option>
+                                    <option value="Ciclo 2-2026">Ciclo 2-2026</option>
+                                </select>
+                            </div>
+
                     </div>
                     <div class="row p-1">
                         <div class="col text-center">
