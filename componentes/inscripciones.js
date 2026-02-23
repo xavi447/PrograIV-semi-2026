@@ -88,17 +88,27 @@ const inscripciones = {
             }
 
             
-            let alumno = await db.alumnos
-                .filter(a => a.codigo === this.inscripcion.codigo_alumno)
-                .toArray();
+            let matricula = await db.matriculas
+    .where("codigo_alumno")
+    .equals(this.inscripcion.codigo_alumno)
+    .and(m => m.ciclo_periodo === this.inscripcion.ciclo_periodo)
+    .first();
 
-            if (alumno.length === 0) {
-                alertify.error('El alumno no está matriculado');
-                return;
-            }
+if (!matricula) {
+    alertify.error('El alumno no está matriculado en este ciclo');
+    return;
+}
 
-            this.inscripcion.nombre_alumno = alumno[0].nombre;
+let alumno = await db.alumnos
+    .where("codigo")
+    .equals(this.inscripcion.codigo_alumno)
+    .first();
 
+if (alumno) {
+    this.inscripcion.nombre_alumno = alumno.nombre;
+} else {
+    this.inscripcion.nombre_alumno = '';
+}
             let duplicado = await db.inscripciones
                 .filter(i =>
                     i.codigo_alumno === this.inscripcion.codigo_alumno &&
@@ -129,12 +139,13 @@ const inscripciones = {
                 return;
             }
 
-            let datos = {
-                idInscripcion: this.accion === 'modificar'
-                    ? this.idInscripcion
-                    : this.getId(),
-                ...this.inscripcion
-            };
+            let datos = { ...this.inscripcion };
+
+if (this.accion === 'modificar') {
+    datos.idInscripcion = this.idInscripcion;
+} else {
+    delete datos.idInscripcion; 
+}
 
             datos.hash = sha256(JSON.stringify(datos));
 
@@ -160,14 +171,14 @@ const inscripciones = {
                     <div class="card-body">
 
                         <div class="row p-1">
-                            <div class="col-3">CÓDIGO ALUMNO: *</div>
+                            <div class="col-3">CÓDIGO ALUMNO: </div>
                             <div class="col-4">
                                 <input v-model="inscripcion.codigo_alumno" type="text" class="form-control">
                             </div>
                         </div>
 
                         <div class="row p-1">
-                            <div class="col-3">MATERIA: *</div>
+                            <div class="col-3">MATERIA: </div>
                             <div class="col-6">
                                 <select v-model="inscripcion.codigo_materia"
                                         @change="seleccionarMateria"
@@ -184,18 +195,21 @@ const inscripciones = {
                         </div>
 
                         <div class="row p-1">
-                            <div class="col-3">FECHA INSCRIPCIÓN: *</div>
+                            <div class="col-3">FECHA INSCRIPCIÓN: </div>
                             <div class="col-4">
                                 <input v-model="inscripcion.fecha_inscripcion" type="date" class="form-control">
                             </div>
                         </div>
 
                         <div class="row p-1">
-                            <div class="col-3">CICLO/PERIODO: *</div>
+                            <div class="col-3">Ciclo/Periodo:</div>
                             <div class="col-4">
-                                <input v-model="inscripcion.ciclo_periodo" type="text" class="form-control">
+                                <select v-model="inscripcion.ciclo_periodo" class="form-control">
+                                <option value="" disabled>Seleccione ciclo</option>
+                                    <option value="Ciclo 1-2026">Ciclo 1-2026</option>
+                                    <option value="Ciclo 2-2026">Ciclo 2-2026</option>
+                                </select>
                             </div>
-                        </div>
 
                         <div class="row p-1">
                             <div class="col-3">ESTADO:</div>

@@ -31,21 +31,38 @@ const matriculas = {
             this.matricula.ciclo_periodo = '';
         },
         async guardarMatricula(){
-            let datos = {
-                idMatricula: this.accion=='modificar'
-                    ? this.idMatricula
-                    : new Date().getTime(),
-                codigo_alumno: this.matricula.codigo_alumno,
-                ciclo_periodo: this.matricula.ciclo_periodo
-            };
 
-            datos.hash = sha256(JSON.stringify(datos));
+    if(!this.matricula.codigo_alumno){
+        alertify.error("Ingrese un código de alumno");
+        return;
+    }
 
-            await db.matriculas.put(datos);
+    
+    let alumno = await db.alumnos
+        .where("codigo")
+        .equals(this.matricula.codigo_alumno)
+        .first();
 
-            this.limpiarFormulario();
-            alertify.success("Matricula guardada correctamente");
-        }
+    if(!alumno){
+        alertify.error("El alumno no existe, no puede matricularse");
+        return;
+    }
+
+    let datos = {
+        idMatricula: this.accion=='modificar'
+            ? this.idMatricula
+            : new Date().getTime(),
+        codigo_alumno: this.matricula.codigo_alumno,
+        ciclo_periodo: this.matricula.ciclo_periodo
+    };
+
+    datos.hash = sha256(JSON.stringify(datos));
+
+    await db.matriculas.put(datos);
+
+    this.limpiarFormulario();
+    alertify.success("Matricula guardada correctamente");
+}
     },
 
 template: `

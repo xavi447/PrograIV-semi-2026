@@ -37,12 +37,9 @@ const busqueda_inscripciones = {
     template: `
         <div>
             <div class="row mb-2">
-                <div class="col-6">
-                    <input v-model="buscar" type="text" class="form-control" placeholder="Buscar inscripción de materias">
-                </div>
-                <div class="col-6">
-                    <button @click="obtenerInscripciones" class="btn btn-primary">Buscar</button>
-                </div>
+                <th colspan="6">
+                     <input autocomplete="off" type="search" @keyup="obtenerInscripciones()" v-model="buscar" placeholder="Buscar inscripción" class="form-control">
+                     </th>
             </div>
 
             <div class="row">

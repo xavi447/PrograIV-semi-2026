@@ -27,12 +27,10 @@ const busqueda_matriculas = {
     template:  
         `<div>
             <div class="row">  
-                <div class="col-6"> 
-                    <input v-model="buscar" type="text" class="form-control" placeholder="Buscar matricula">
-                </div>            
-                <div class="col-6">
-                    <button @click="obtenerMatriculas" class="btn btn-primary">Buscar</button>
-                </div>
+               <tr>
+                 <th colspan="6">
+                     <input autocomplete="off" type="search" @keyup="obtenerMatriculas()" v-model="buscar" placeholder="Buscar matricula" class="form-control">
+                     </th>
             </div>
             <div class="row">
                 <div class="col-12">
