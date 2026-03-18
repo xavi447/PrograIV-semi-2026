@@ -48,8 +48,12 @@ createApp({
             this.$refs[ventana][metodo]();
         },
         abrirVentana(ventana){
-            this.forms[ventana].mostrar = !this.forms[ventana].mostrar;
-        },
+    const estadoActual = this.forms[ventana].mostrar;
+    Object.keys(this.forms).forEach(key => {
+        this.forms[key].mostrar = false;
+    });
+    this.forms[ventana].mostrar = !estadoActual;
+},
         modificar(ventana, metodo, data){
             this.$refs[ventana][metodo](data);
         }
