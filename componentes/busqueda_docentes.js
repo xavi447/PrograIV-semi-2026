@@ -14,25 +14,40 @@ const busqueda_docentes = {
                 docente => docente.codigo.toLowerCase().includes(this.buscar.toLowerCase()) 
                     || docente.nombre.toLowerCase().includes(this.buscar.toLowerCase())
             ).toArray();
+
+         
+            if(this.docentes.length<1 && this.buscar.length<=0){
+                fetch(`private/modulos/docentes/docente.php?accion=consultar`)
+                    .then(response=>response.json())
+                    .then(data=>{
+                        this.docentes = data;
+                        db.docentes.bulkAdd(data);
+                    });
+            }
         },
         async eliminarDocente(docente, e){
             e.stopPropagation();
-            alertify.confirm('Elimanar docentes', `¿Está seguro de eliminar el docente ${docente.nombre}?`, async e=>{
+            alertify.confirm('Eliminar docentes', `¿Está seguro de eliminar el docente ${docente.nombre}?`, async e=>{
                 await db.docentes.delete(docente.idDocente);
+
+                fetch(`private/modulos/docentes/docente.php?accion=eliminar&docentes=${JSON.stringify(docente)}`)
+                    .then(response=>response.json())
+                    .then(data=>{
+                        if(data!=true) alertify.error(`Error al sincronizar con el servidor: ${data}`);
+                    });
+
                 this.obtenerDocentes();
                 alertify.success(`Docente ${docente.nombre} eliminado correctamente`);
-            }, () => {
-                //No hacer nada
-            });
+            }, () => {});
         },
     },
     template: `
         <div class="row">
             <div class="col-6">
-                <table class="table table-success table-striped" id="tblDocentes">
+                <table class="table table-striped table-hover" id="tblDocentes">
                     <thead>
                         <tr>
-                            <th colspan="6">
+                            <th colspan="7">
                                 <input autocomplete="off" type="search" @keyup="obtenerDocentes()" v-model="buscar" placeholder="Buscar docente" class="form-control">
                             </th>
                         </tr>
@@ -43,7 +58,6 @@ const busqueda_docentes = {
                             <th>EMAIL</th>
                             <th>TELEFONO</th>
                             <th>ESCALAFON</th>
-                            <th>HASH</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -55,7 +69,6 @@ const busqueda_docentes = {
                             <td>{{ docente.email }}</td>
                             <td>{{ docente.telefono }}</td>
                             <td>{{ docente.escalafon }}</td>
-                            <td>{{ docente.hash }}</td>
                             <td>
                                 <button class="btn btn-danger" @click="eliminarDocente(docente, $event)">DEL</button>
                             </td>

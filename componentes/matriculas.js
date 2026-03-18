@@ -6,17 +6,18 @@ const matriculas = {
                 idMatricula:'',
                 codigo_alumno:'',
                 ciclo_periodo:'',
-                hash:'',
+                
             },
             accion:'nuevo',
             idMatricula:0,
+            data_matriculas:[]
         }
     },
     methods:{
         buscarMatricula(){
-    this.forms.busqueda_matriculas.mostrar =
-        !this.forms.busqueda_matriculas.mostrar;
-    this.$emit('buscar');
+            this.forms.busqueda_matriculas.mostrar =
+                !this.forms.busqueda_matriculas.mostrar;
+            this.$emit('buscar');
         },
         modificarMatricula(matricula){
             this.accion = 'modificar';
@@ -32,37 +33,51 @@ const matriculas = {
         },
         async guardarMatricula(){
 
-    if(!this.matricula.codigo_alumno){
-        alertify.error("Ingrese un código de alumno");
-        return;
-    }
+            if(!this.matricula.codigo_alumno){
+                alertify.error("Ingrese un código de alumno");
+                return;
+            }
 
-    
-    let alumno = await db.alumnos
-        .where("codigo")
-        .equals(this.matricula.codigo_alumno)
-        .first();
+            
+            let total = await db.alumnos.count();
+            if(total === 0){
+                let res = await fetch(`private/modulos/alumnos/alumno.php?accion=consultar`);
+                let data = await res.json();
+                await db.alumnos.bulkAdd(data);
+            }
 
-    if(!alumno){
-        alertify.error("El alumno no existe, no puede matricularse");
-        return;
-    }
+            let alumno = await db.alumnos
+                .where("codigo")
+                .equals(this.matricula.codigo_alumno)
+                .first();
 
-    let datos = {
-        idMatricula: this.accion=='modificar'
-            ? this.idMatricula
-            : new Date().getTime(),
-        codigo_alumno: this.matricula.codigo_alumno,
-        ciclo_periodo: this.matricula.ciclo_periodo
-    };
+            if(!alumno){
+                alertify.error("El alumno no existe, no puede matricularse");
+                return;
+            }
 
-    datos.hash = sha256(JSON.stringify(datos));
+            let datos = {
+                idMatricula: this.accion=='modificar'
+                    ? this.idMatricula
+                    : uuid.v4(),
+                codigo_alumno: this.matricula.codigo_alumno,
+                ciclo_periodo: this.matricula.ciclo_periodo
+            };
 
-    await db.matriculas.put(datos);
+            
 
-    this.limpiarFormulario();
-    alertify.success("Matricula guardada correctamente");
-}
+            await db.matriculas.put(datos);
+
+            // SINCRONIZACION
+            fetch(`private/modulos/matriculas/matricula.php?accion=${this.accion}&matriculas=${JSON.stringify(datos)}`)
+                .then(response=>response.json())
+                .then(data=>{
+                    if(data!=true) alertify.error(`Error al sincronizar con el servidor: ${data}`);
+                });
+
+            this.limpiarFormulario();
+            alertify.success("Matricula guardada correctamente");
+        }
     },
 
 template: `
@@ -92,9 +107,9 @@ template: `
                     </div>
                     <div class="row p-1">
                         <div class="col text-center">
-                            <button type="submit"@click="guardarMatricula" id="btnguardarMatricula" class="btn btn-primary">GUARDAR</button>
-                                    <button type="reset" @click="limpiarFormulario" id="btnCancelarMatricula" class="btn btn-warning">NUEVO</button>
-                                    <button type="button" @click="buscarMatricula" id="btnBuscarMatricula" class="btn btn-success">BUSCAR</button>
+                            <button type="submit" @click="guardarMatricula" class="btn btn-primary">GUARDAR</button>
+                            <button type="reset" @click="limpiarFormulario" class="btn btn-warning">NUEVO</button>
+                            <button type="button" @click="buscarMatricula" class="btn btn-success">BUSCAR</button>
                         </div>
                     </div>
                 </div>
