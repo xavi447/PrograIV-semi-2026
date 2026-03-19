@@ -32,22 +32,25 @@ const materias = {
                 nombre: this.materia.nombre,
                 uv: this.materia.uv,
             };
-            this.buscar = datos.codigo;
-            //await this.obtenerMaterias();
-
-            if(this.data_materias.length > 0 && this.accion=='nuevo'){
-                alertify.error(`El codigo del materia ya existe, ${this.data_materias[0].nombre}`);
-                return; //Termina la ejecucion de la funcion
+            
+            try {
+                await db.execute(
+                    `INSERT OR REPLACE INTO materias (idMateria, codigo, nombre, uv) VALUES (?, ?, ?, ?)`,
+                    [datos.idMateria, datos.codigo, datos.nombre, datos.uv]
+                );
+                
+                fetch(`private/modulos/materias/materia.php?accion=${this.accion}&materias=${JSON.stringify(datos)}`)
+                    .then(response=>response.json())
+                    .then(data=>{
+                        if(data!=true) alertify.error(`Error al sincronizar con el servidor: ${data}`);
+                    });
+                
+                this.limpiarFormulario();
+                alertify.success(`Materia ${datos.nombre} guardada correctamente`);
+            } catch (error) {
+                alertify.error(`Error al guardar: ${error.message}`);
+                console.error('Error en guardarMateria:', error);
             }
-            db.materias.put(datos);
-            fetch(`private/modulos/materias/materia.php?accion=${this.accion}&materias=${JSON.stringify(datos)}`)
-                .then(response=>response.json())
-                .then(data=>{
-                    if(data!=true) alertify.error(`Error al sincronizar con el servidor: ${data}`);
-                });
-            this.limpiarFormulario();
-            //this.obtenerMaterias();
-            alertify.success(`Materia ${datos.nombre} guardada correctamente`);
         },
         getId(){
             return uuid.v4();

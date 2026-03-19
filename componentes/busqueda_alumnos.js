@@ -11,23 +11,32 @@ const busqueda_alumnos = {
             this.$emit('modificar', alumno);
         },
         async obtenerAlumnos(){
-            this.alumnos = await db.alumnos.filter(
-                alumno => alumno.codigo.toLowerCase().includes(this.buscar.toLowerCase()) 
-                    || alumno.nombre.toLowerCase().includes(this.buscar.toLowerCase())
-            ).toArray();
-            if( this.alumnos.length<1 && this.buscar.length<=0){
-                fetch(`private/modulos/alumnos/alumno.php?accion=consultar`)
-                    .then(response=>response.json())
-                    .then(data=>{
-                        this.alumnos = data;
-                        db.alumnos.bulkAdd(data);
-                    });
+            let query = `SELECT * FROM alumnos`;
+            if (this.buscar.length > 0) {
+                const search = `%${this.buscar.toLowerCase()}%`;
+                query += ` WHERE LOWER(codigo) LIKE ? OR LOWER(nombre) LIKE ?`;
+                this.alumnos = db.select(query, [search, search]);
+            } else {
+                this.alumnos = db.select(query);
+                if (this.alumnos.length === 0) {
+                    fetch(`private/modulos/alumnos/alumno.php?accion=consultar`)
+                        .then(response=>response.json())
+                        .then(async data=>{
+                            this.alumnos = data;
+                            for (const item of data) {
+                                await db.execute(
+                                    `INSERT OR REPLACE INTO alumnos (idAlumno, codigo, nombre, direccion, email, telefono) VALUES (?, ?, ?, ?, ?, ?)`,
+                                    [item.idAlumno, item.codigo, item.nombre, item.direccion, item.email, item.telefono]
+                                );
+                            }
+                        });
+                }
             }
         },
         async eliminarAlumno(alumno, e){
             e.stopPropagation();
             alertify.confirm('Elimanar alumnos', `¿Está seguro de eliminar el alumno ${alumno.nombre}?`, async e=>{
-                await db.alumnos.delete(alumno.idAlumno);
+                await db.execute(`DELETE FROM alumnos WHERE idAlumno = ?`, [alumno.idAlumno]);
                 fetch(`private/modulos/alumnos/alumno.php?accion=eliminar&alumnos=${JSON.stringify(alumno)}`)
                     .then(response=>response.json())
                     .then(data=>{

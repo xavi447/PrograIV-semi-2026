@@ -38,45 +38,52 @@ const matriculas = {
                 return;
             }
 
-            
-            let total = await db.alumnos.count();
-            if(total === 0){
-                let res = await fetch(`private/modulos/alumnos/alumno.php?accion=consultar`);
-                let data = await res.json();
-                await db.alumnos.bulkAdd(data);
+            try {
+                let total = db.select(`SELECT COUNT(*) as count FROM alumnos`)[0]?.count || 0;
+                if(total === 0){
+                    let res = await fetch(`private/modulos/alumnos/alumno.php?accion=consultar`);
+                    let data = await res.json();
+                    for (const item of data) {
+                        await db.execute(
+                            `INSERT OR REPLACE INTO alumnos (idAlumno, codigo, nombre, direccion, email, telefono) VALUES (?, ?, ?, ?, ?, ?)`,
+                            [item.idAlumno, item.codigo, item.nombre, item.direccion, item.email, item.telefono]
+                        );
+                    }
+                }
+
+                let alumno = db.select(`SELECT * FROM alumnos WHERE codigo = ? LIMIT 1`, [this.matricula.codigo_alumno])[0];
+
+                if(!alumno){
+                    alertify.error("El alumno no existe, no puede matricularse");
+                    return;
+                }
+
+                let datos = {
+                    idMatricula: this.accion=='modificar'
+                        ? this.idMatricula
+                        : uuid.v4(),
+                    codigo_alumno: this.matricula.codigo_alumno,
+                    ciclo_periodo: this.matricula.ciclo_periodo
+                };
+
+                await db.execute(
+                    `INSERT OR REPLACE INTO matriculas (idMatricula, codigo_alumno, ciclo_periodo) VALUES (?, ?, ?)`,
+                    [datos.idMatricula, datos.codigo_alumno, datos.ciclo_periodo]
+                );
+
+                // SINCRONIZACION
+                fetch(`private/modulos/matriculas/matricula.php?accion=${this.accion}&matriculas=${JSON.stringify(datos)}`)
+                    .then(response=>response.json())
+                    .then(data=>{
+                        if(data!=true) alertify.error(`Error al sincronizar con el servidor: ${data}`);
+                    });
+
+                this.limpiarFormulario();
+                alertify.success("Matricula guardada correctamente");
+            } catch (error) {
+                alertify.error(`Error al guardar: ${error.message}`);
+                console.error('Error en guardarMatricula:', error);
             }
-
-            let alumno = await db.alumnos
-                .where("codigo")
-                .equals(this.matricula.codigo_alumno)
-                .first();
-
-            if(!alumno){
-                alertify.error("El alumno no existe, no puede matricularse");
-                return;
-            }
-
-            let datos = {
-                idMatricula: this.accion=='modificar'
-                    ? this.idMatricula
-                    : uuid.v4(),
-                codigo_alumno: this.matricula.codigo_alumno,
-                ciclo_periodo: this.matricula.ciclo_periodo
-            };
-
-            
-
-            await db.matriculas.put(datos);
-
-            // SINCRONIZACION
-            fetch(`private/modulos/matriculas/matricula.php?accion=${this.accion}&matriculas=${JSON.stringify(datos)}`)
-                .then(response=>response.json())
-                .then(data=>{
-                    if(data!=true) alertify.error(`Error al sincronizar con el servidor: ${data}`);
-                });
-
-            this.limpiarFormulario();
-            alertify.success("Matricula guardada correctamente");
         }
     },
 

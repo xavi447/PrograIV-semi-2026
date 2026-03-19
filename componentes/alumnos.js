@@ -38,23 +38,25 @@ const alumnos = {
                 email: this.alumno.email,
                 telefono: this.alumno.telefono
             };
-            //datos.hash = sha256(JSON.stringify(datos));
-            this.buscar = datos.codigo;
-            //await this.obtenerAlumnos();
-
-            if(this.data_alumnos.length > 0 && this.accion=='nuevo'){
-                alertify.error(`El codigo del alumno ya existe, ${this.data_alumnos[0].nombre}`);
-                return; //Termina la ejecucion de la funcion
+            
+            try {
+                await db.execute(
+                    `INSERT OR REPLACE INTO alumnos (idAlumno, codigo, nombre, direccion, email, telefono) VALUES (?, ?, ?, ?, ?, ?)`,
+                    [datos.idAlumno, datos.codigo, datos.nombre, datos.direccion, datos.email, datos.telefono]
+                );
+                
+                fetch(`private/modulos/alumnos/alumno.php?accion=${this.accion}&alumnos=${JSON.stringify(datos)}`)
+                    .then(response=>response.json())
+                    .then(data=>{
+                        if(data!=true) alertify.error(`Error al sincronizar con el servidor: ${data}`);
+                    });
+                
+                this.limpiarFormulario();
+                alertify.success(`${datos.nombre} guardado correctamente`);
+            } catch (error) {
+                alertify.error(`Error al guardar: ${error.message}`);
+                console.error('Error en guardarAlumno:', error);
             }
-            db.alumnos.put(datos);
-            fetch(`private/modulos/alumnos/alumno.php?accion=${this.accion}&alumnos=${JSON.stringify(datos)}`)
-                .then(response=>response.json())
-                .then(data=>{
-                    if(data!=true) alertify.error(`Error al sincronizar con el servidor: ${data}`);
-                });
-            this.limpiarFormulario();
-            alertify.success(`${datos.nombre} guardado correctamente`);
-            //this.obtenerAlumnos();
         },
         getId(){
             return uuid.v4();

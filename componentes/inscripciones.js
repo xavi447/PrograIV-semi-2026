@@ -23,7 +23,7 @@ const inscripciones = {
 
     methods: {
         async cargarMaterias() {
-            this.materias = await db.materias.toArray();
+            this.materias = db.select(`SELECT * FROM materias`);
         },
 
         buscarInscripcion() {
@@ -72,32 +72,40 @@ const inscripciones = {
                 return;
             }
 
-            let alumno = await fetch(`private/modulos/inscripciones/inscripcion.php?accion=validar_alumno&codigo=${this.inscripcion.codigo_alumno}`)
-                .then(response => response.json());
+            try {
+                let alumno = await fetch(`private/modulos/inscripciones/inscripcion.php?accion=validar_alumno&codigo=${this.inscripcion.codigo_alumno}`)
+                    .then(response => response.json());
 
-            if (!alumno) {
-                alertify.error('El código del alumno no existe');
-                return;
+                if (!alumno) {
+                    alertify.error('El código del alumno no existe');
+                    return;
+                }
+
+                let datos = {
+                    idInscripcion: this.accion === 'modificar' ? this.idInscripcion : this.getId(),
+                    codigo_alumno: this.inscripcion.codigo_alumno,
+                    materia: this.inscripcion.materia,
+                    fecha_inscripcion: this.inscripcion.fecha_inscripcion,
+                    ciclo_periodo: this.inscripcion.ciclo_periodo,
+                    observaciones: this.inscripcion.observaciones,
+                };
+
+                await db.execute(
+                    `INSERT OR REPLACE INTO inscripciones (idInscripcion, codigo_alumno, materia, fecha_inscripcion, ciclo_periodo, observaciones) VALUES (?, ?, ?, ?, ?, ?)`,
+                    [datos.idInscripcion, datos.codigo_alumno, datos.materia, datos.fecha_inscripcion, datos.ciclo_periodo, datos.observaciones]
+                );
+                fetch(`private/modulos/inscripciones/inscripcion.php?accion=${this.accion}&inscripciones=${JSON.stringify(datos)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data != true) alertify.error(`Error al sincronizar con el servidor: ${data}`);
+                    });
+
+                this.limpiarFormulario();
+                alertify.success(`Inscripcion guardada correctamente`);
+            } catch (error) {
+                alertify.error(`Error al guardar: ${error.message}`);
+                console.error('Error en guardarInscripcion:', error);
             }
-
-            let datos = {
-                idInscripcion: this.accion === 'modificar' ? this.idInscripcion : this.getId(),
-                codigo_alumno: this.inscripcion.codigo_alumno,
-                materia: this.inscripcion.materia,
-                fecha_inscripcion: this.inscripcion.fecha_inscripcion,
-                ciclo_periodo: this.inscripcion.ciclo_periodo,
-                observaciones: this.inscripcion.observaciones,
-            };
-
-            await db.inscripciones.put(datos);
-            fetch(`private/modulos/inscripciones/inscripcion.php?accion=${this.accion}&inscripciones=${JSON.stringify(datos)}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data != true) alertify.error(`Error al sincronizar con el servidor: ${data}`);
-                });
-
-            this.limpiarFormulario();
-            alertify.success(`Inscripcion guardada correctamente`);
         },
 
         getId() {

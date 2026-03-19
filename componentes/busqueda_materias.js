@@ -10,23 +10,32 @@ const busqueda_materias = {
             this.$emit('modificar', materia);
         },
         async obtenerMaterias(){
-            this.materias = await db.materias.orderBy('codigo').filter(
-                materia => materia.codigo.toLowerCase().includes(this.buscar.toLowerCase()) 
-                    || materia.nombre.toLowerCase().includes(this.buscar.toLowerCase())
-            ).toArray();
-            if( this.materias.length<1 && this.buscar.length<=0){
-                fetch(`private/modulos/materias/materia.php?accion=consultar`)
-                    .then(response=>response.json())
-                    .then(data=>{
-                        this.materias = data;
-                        db.materias.bulkAdd(data);
-                    });
+            let query = `SELECT * FROM materias ORDER BY codigo`;
+            if (this.buscar.length > 0) {
+                const search = `%${this.buscar.toLowerCase()}%`;
+                query = `SELECT * FROM materias WHERE LOWER(codigo) LIKE ? OR LOWER(nombre) LIKE ? ORDER BY codigo`;
+                this.materias = db.select(query, [search, search]);
+            } else {
+                this.materias = db.select(query);
+                if (this.materias.length === 0) {
+                    fetch(`private/modulos/materias/materia.php?accion=consultar`)
+                        .then(response=>response.json())
+                        .then(async data=>{
+                            this.materias = data;
+                            for (const item of data) {
+                                await db.execute(
+                                    `INSERT OR REPLACE INTO materias (idMateria, codigo, nombre, uv) VALUES (?, ?, ?, ?)`,
+                                    [item.idMateria, item.codigo, item.nombre, item.uv]
+                                );
+                            }
+                        });
+                }
             }
         },
         async eliminarMateria(materia, e){
             e.stopPropagation();
             alertify.confirm('Eliminar materias', `¿Está seguro de eliminar el materia ${materia.nombre}?`, async e=>{
-                await db.materias.delete(materia.idMateria);
+                await db.execute(`DELETE FROM materias WHERE idMateria = ?`, [materia.idMateria]);
                 fetch(`private/modulos/materias/materia.php?accion=eliminar&materias=${JSON.stringify(materia)}`)
                     .then(response=>response.json())
                     .then(data=>{

@@ -43,25 +43,24 @@ const docentes = {
                 escalafon: this.docente.escalafon
             };
 
-            this.buscar = datos.codigo;
+            try {
+                await db.execute(
+                    `INSERT OR REPLACE INTO docentes (idDocente, codigo, nombre, direccion, email, telefono, escalafon) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    [datos.idDocente, datos.codigo, datos.nombre, datos.direccion, datos.email, datos.telefono, datos.escalafon]
+                );
 
-            
-            if(this.data_docentes.length > 0 && this.accion=='nuevo'){
-                alertify.error(`El codigo del docente ya existe, ${this.data_docentes[0].nombre}`);
-                return;
+                fetch(`private/modulos/docentes/docente.php?accion=${this.accion}&docentes=${JSON.stringify(datos)}`)
+                    .then(response=>response.json())
+                    .then(data=>{
+                        if(data!=true) alertify.error(`Error al sincronizar con el servidor: ${data}`);
+                    });
+
+                this.limpiarFormulario();
+                alertify.success(`${datos.nombre} guardado correctamente`);
+            } catch (error) {
+                alertify.error(`Error al guardar: ${error.message}`);
+                console.error('Error en guardarDocente:', error);
             }
-
-            db.docentes.put(datos);
-
-            
-            fetch(`private/modulos/docentes/docente.php?accion=${this.accion}&docentes=${JSON.stringify(datos)}`)
-                .then(response=>response.json())
-                .then(data=>{
-                    if(data!=true) alertify.error(`Error al sincronizar con el servidor: ${data}`);
-                });
-
-            this.limpiarFormulario();
-            alertify.success(`${datos.nombre} guardado correctamente`);
         },
         getId(){
             return uuid.v4(); 

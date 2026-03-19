@@ -11,25 +11,32 @@ const busqueda_inscripciones = {
             this.$emit('modificar', inscripcion);
         },
         async obtenerInscripciones() {
-            this.inscripciones = await db.inscripciones.orderBy('codigo_alumno').filter(
-                inscripcion => inscripcion.codigo_alumno?.toLowerCase().includes(this.buscar.toLowerCase())
-                    || String(inscripcion.materia)?.toLowerCase().includes(this.buscar.toLowerCase())
-                    || inscripcion.ciclo_periodo?.toLowerCase().includes(this.buscar.toLowerCase())
-                    || inscripcion.observaciones?.toLowerCase().includes(this.buscar.toLowerCase())
-            ).toArray();
-            if (this.inscripciones.length < 1 && this.buscar.length <= 0) {
-                fetch(`private/modulos/inscripciones/inscripcion.php?accion=consultar`)
-                    .then(response => response.json())
-                    .then(data => {
-                        this.inscripciones = data;
-                        db.inscripciones.bulkAdd(data);
-                    });
+            let query = `SELECT * FROM inscripciones ORDER BY codigo_alumno`;
+            if (this.buscar.length > 0) {
+                const search = `%${this.buscar.toLowerCase()}%`;
+                query = `SELECT * FROM inscripciones WHERE LOWER(codigo_alumno) LIKE ? OR LOWER(materia) LIKE ? OR LOWER(ciclo_periodo) LIKE ? OR LOWER(observaciones) LIKE ? ORDER BY codigo_alumno`;
+                this.inscripciones = db.select(query, [search, search, search, search]);
+            } else {
+                this.inscripciones = db.select(query);
+                if (this.inscripciones.length === 0) {
+                    fetch(`private/modulos/inscripciones/inscripcion.php?accion=consultar`)
+                        .then(response => response.json())
+                        .then(async data => {
+                            this.inscripciones = data;
+                            for (const item of data) {
+                                await db.execute(
+                                    `INSERT OR REPLACE INTO inscripciones (idInscripcion, codigo_alumno, materia, fecha_inscripcion, ciclo_periodo, observaciones) VALUES (?, ?, ?, ?, ?, ?)`,
+                                    [item.idInscripcion, item.codigo_alumno, item.materia, item.fecha_inscripcion, item.ciclo_periodo, item.observaciones]
+                                );
+                            }
+                        });
+                }
             }
         },
         async eliminarInscripcion(inscripcion, e) {
             e.stopPropagation();
             alertify.confirm('Eliminar inscripcion', `¿Está seguro de eliminar la inscripcion ${inscripcion.idInscripcion}?`, async e => {
-                await db.inscripciones.delete(inscripcion.idInscripcion);
+                await db.execute(`DELETE FROM inscripciones WHERE idInscripcion = ?`, [inscripcion.idInscripcion]);
                 fetch(`private/modulos/inscripciones/inscripcion.php?accion=eliminar&inscripciones=${JSON.stringify(inscripcion)}`)
                     .then(response => response.json())
                     .then(data => {

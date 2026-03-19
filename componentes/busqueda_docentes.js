@@ -10,25 +10,32 @@ const busqueda_docentes = {
             this.$emit('modificar', docente);
         },
         async obtenerDocentes(){
-            this.docentes = await db.docentes.filter(
-                docente => docente.codigo.toLowerCase().includes(this.buscar.toLowerCase()) 
-                    || docente.nombre.toLowerCase().includes(this.buscar.toLowerCase())
-            ).toArray();
-
-         
-            if(this.docentes.length<1 && this.buscar.length<=0){
-                fetch(`private/modulos/docentes/docente.php?accion=consultar`)
-                    .then(response=>response.json())
-                    .then(data=>{
-                        this.docentes = data;
-                        db.docentes.bulkAdd(data);
-                    });
+            let query = `SELECT * FROM docentes`;
+            if (this.buscar.length > 0) {
+                const search = `%${this.buscar.toLowerCase()}%`;
+                query += ` WHERE LOWER(codigo) LIKE ? OR LOWER(nombre) LIKE ?`;
+                this.docentes = db.select(query, [search, search]);
+            } else {
+                this.docentes = db.select(query);
+                if (this.docentes.length === 0) {
+                    fetch(`private/modulos/docentes/docente.php?accion=consultar`)
+                        .then(response=>response.json())
+                        .then(async data=>{
+                            this.docentes = data;
+                            for (const item of data) {
+                                await db.execute(
+                                    `INSERT OR REPLACE INTO docentes (idDocente, codigo, nombre, direccion, email, telefono, escalafon) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                                    [item.idDocente, item.codigo, item.nombre, item.direccion, item.email, item.telefono, item.escalafon]
+                                );
+                            }
+                        });
+                }
             }
         },
         async eliminarDocente(docente, e){
             e.stopPropagation();
             alertify.confirm('Eliminar docentes', `¿Está seguro de eliminar el docente ${docente.nombre}?`, async e=>{
-                await db.docentes.delete(docente.idDocente);
+                await db.execute(`DELETE FROM docentes WHERE idDocente = ?`, [docente.idDocente]);
 
                 fetch(`private/modulos/docentes/docente.php?accion=eliminar&docentes=${JSON.stringify(docente)}`)
                     .then(response=>response.json())

@@ -11,26 +11,32 @@ const busqueda_matriculas = {
             this.$emit('modificar', matricula);
         },
         async obtenerMatriculas() {
-            this.matriculas = await db.matriculas
-                .filter(matricula =>
-                    matricula.codigo_alumno?.toString().includes(this.buscar) ||
-                    matricula.ciclo_periodo?.toLowerCase().includes(this.buscar.toLowerCase())
-                )
-                .toArray();
-
-            if(this.matriculas.length<1 && this.buscar.length<=0){
-                fetch(`private/modulos/matriculas/matricula.php?accion=consultar`)
-                    .then(response=>response.json())
-                    .then(data=>{
-                        this.matriculas = data;
-                        db.matriculas.bulkAdd(data);
-                    });
+            let query = `SELECT * FROM matriculas`;
+            if (this.buscar.length > 0) {
+                const search = `%${this.buscar.toLowerCase()}%`;
+                query += ` WHERE codigo_alumno LIKE ? OR LOWER(ciclo_periodo) LIKE ?`;
+                this.matriculas = db.select(query, [search, search]);
+            } else {
+                this.matriculas = db.select(query);
+                if (this.matriculas.length === 0) {
+                    fetch(`private/modulos/matriculas/matricula.php?accion=consultar`)
+                        .then(response=>response.json())
+                        .then(async data=>{
+                            this.matriculas = data;
+                            for (const item of data) {
+                                await db.execute(
+                                    `INSERT OR REPLACE INTO matriculas (idMatricula, codigo_alumno, ciclo_periodo) VALUES (?, ?, ?)`,
+                                    [item.idMatricula, item.codigo_alumno, item.ciclo_periodo]
+                                );
+                            }
+                        });
+                }
             }
         },
         async eliminarMatricula(matricula, e) {
             e.stopPropagation();
             alertify.confirm('Eliminar matrículas', `¿Está seguro de eliminar la matrícula?`, async e=>{
-                await db.matriculas.delete(matricula.idMatricula);
+                await db.execute(`DELETE FROM matriculas WHERE idMatricula = ?`, [matricula.idMatricula]);
 
                 fetch(`private/modulos/matriculas/matricula.php?accion=eliminar&matriculas=${JSON.stringify(matricula)}`)
                     .then(response=>response.json())
