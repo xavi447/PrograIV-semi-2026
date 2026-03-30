@@ -8,12 +8,7 @@ const alumnos = {
                 nombre:"",
                 direccion:"",
                 email:"",
-                telefono:"",
-                municipio:"",
-                departamento:"",
-                fecha_de_nacimiento:"",
-                sexo:"",
-                hash:""
+                telefono:""
             },
             accion:'nuevo',
             idAlumno:0,
@@ -33,10 +28,6 @@ const alumnos = {
             this.alumno.direccion = alumno.direccion;
             this.alumno.email = alumno.email;
             this.alumno.telefono = alumno.telefono;
-            this.alumno.municipio = alumno.municipio;
-            this.alumno.departamento = alumno.departamento;
-            this.alumno.fecha_de_nacimiento = alumno.fecha_de_nacimiento;
-            this.alumno.sexo = alumno.sexo;
         },
         async guardarAlumno() {
             let datos = {
@@ -45,27 +36,28 @@ const alumnos = {
                 nombre: this.alumno.nombre,
                 direccion: this.alumno.direccion,
                 email: this.alumno.email,
-                telefono: this.alumno.telefono,
-                municipio: this.alumno.municipio,
-                departamento: this.alumno.departamento,
-                fecha_de_nacimiento: this.alumno.fecha_de_nacimiento,
-                sexo: this.alumno.sexo
+                telefono: this.alumno.telefono
             };
-            datos.hash=sha256(JSON.stringify(datos));
+            //datos.hash = sha256(JSON.stringify(datos));
             this.buscar = datos.codigo;
             //await this.obtenerAlumnos();
 
             if(this.data_alumnos.length > 0 && this.accion=='nuevo'){
-               alertify.error(`El codigo del alumno ya existe, ${this.data_alumnos[0].nombre}`);
+                alertify.error(`El codigo del alumno ya existe, ${this.data_alumnos[0].nombre}`);
                 return; //Termina la ejecucion de la funcion
             }
             db.alumnos.put(datos);
+            fetch(`private/modulos/alumnos/alumno.php?accion=${this.accion}&alumnos=${JSON.stringify(datos)}`)
+                .then(response=>response.json())
+                .then(data=>{
+                    if(data!=true) alertify.error(`Error al sincronizar con el servidor: ${data}`);
+                });
             this.limpiarFormulario();
-             alertify.success(`${datos.nombre} guardado correctamente`);
+            alertify.success(`${datos.nombre} guardado correctamente`);
             //this.obtenerAlumnos();
         },
         getId(){
-            return new Date().getTime();
+            return uuid.v4();
         },
         limpiarFormulario(){
             this.accion = 'nuevo';
@@ -75,18 +67,13 @@ const alumnos = {
             this.alumno.direccion = '';
             this.alumno.email = '';
             this.alumno.telefono = '';
-            this.alumno.municipio = '';
-            this.alumno.departamento = '';
-            this.alumno.fecha_de_nacimiento = '';
-            this.alumno.sexo = '';
-
         },
     },
     template: `
         <div class="row">
             <div class="col-6">
                 <form id="frmAlumnos" @submit.prevent="guardarAlumno" @reset.prevent="limpiarFormulario">
-                   <div class="card text-bg-secondary mb-3" style="max-width: 38rem;">
+                    <div class="card text-bg-secondary mb-3" style="max-width: 36rem;">
                         <div class="card-header">REGISTRO DE ALUMNOS</div>
                         <div class="card-body">
                             <div class="row p-1">
@@ -129,42 +116,6 @@ const alumnos = {
                                     <input placeholder="telefono" required v-model="alumno.telefono" type="text" class="form-control">
                                 </div>
                             </div>
-                            <div class="row p-1">
-                                <div class="col-3">
-                                    MUNICIPIO:
-                                </div>
-                                <div class="col-6">
-                                    <input placeholder="municipio" required v-model="alumno.municipio" type="text" class="form-control">
-                                </div>
-                            </div>
-                            <div class="row p-1">
-                                <div class="col-3">
-                                    DEPARTAMENTO:
-                                </div>
-                                <div class="col-6">
-                                    <input placeholder="departamento" required v-model="alumno.departamento" type="text" class="form-control">
-                                </div>
-                            </div>
-                            <div class="row p-1">
-                                <div class="col-3">
-                                    FECHA DE NACIMIENTO:
-                                </div>
-                                <div class="col-6">
-                                    <input placeholder="fecha de nacimiento" required v-model="alumno.fecha_de_nacimiento" type="date" class="form-control">
-                                </div>
-                            </div>
-                            <div class="row p-1">
-                                <div class="col-3">
-                                    SEXO:
-                                </div>
-                                <div class="col-6">
-                                    <select required v-model="alumno.sexo" class="form-select">
-                                        <option value="">Seleccionar sexo</option>
-                                        <option value="Masculino">Masculino</option>
-                                        <option value="Femenino">Femenino</option>
-                                    </select>
-                                </div>
-                            </div>
                         </div>
                         <div class="card-footer">
                             <div class="row">
@@ -180,4 +131,5 @@ const alumnos = {
             </div>
         </div>
     `
+    
 };

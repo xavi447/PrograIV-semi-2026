@@ -1,15 +1,18 @@
 const { createApp } = Vue,
     Dexie = window.Dexie,
-    sha256 = CryptoJS.SHA256;
+    db = new Dexie("db_academica"),
+    sha256 = CryptoJS.SHA256,
+    uuid = window.uuid;
 
-     window.db = new Dexie("db_academica");
-    window.db.version(2).stores({
-        alumnos: "++idAlumno,codigo,nombre,direccion,email,telefono,municipio,departamento,fecha_de_nacimiento,sexo,hash",
-        materias: "++idMateria,codigo,nombre,uv,hash",
-        docentes: "++idDocente,codigo,nombre,direccion,email,telefono,escalafon,hash",
-        matriculas: "++idMatricula,codigo_alumno,ciclo_periodo,hash",
-        inscripciones: "++idInscripcion,codigo_alumno,codigo_materia,fecha_inscripcion,ciclo_periodo,hash",
-    });
+
+db.version(1).stores({
+    alumnos: "idAlumno, codigo, nombre, direccion, email, telefono",
+    materias: "idMateria, codigo, nombre, uv",
+    docentes: "idDocente, codigo, nombre, direccion, email, telefono, escalafon",
+    matriculas: "idMatricula, codigo_alumno, ciclo_periodo",
+    inscripciones: "idInscripcion, codigo_alumno, materia, fecha_inscripcion, ciclo_periodo, observaciones"
+
+});
 
 createApp({
     components:{
@@ -23,7 +26,6 @@ createApp({
         busqueda_matriculas,
         inscripciones,
         busqueda_inscripciones
-        
     },
     data(){
         return{
@@ -37,7 +39,7 @@ createApp({
                 matriculas:{mostrar:false},
                 busqueda_matriculas:{mostrar:false},
                 inscripciones:{mostrar:false},
-                busqueda_inscripciones:{mostrar:false}
+                busqueda_inscripciones:{mostrar:false},
             }
         }
     },
@@ -45,18 +47,16 @@ createApp({
         buscar(ventana, metodo){
             this.$refs[ventana][metodo]();
         },
-     abrirVentana(ventana){
+        abrirVentana(ventana){
     const estadoActual = this.forms[ventana].mostrar;
-
     Object.keys(this.forms).forEach(key => {
         this.forms[key].mostrar = false;
     });
-
     this.forms[ventana].mostrar = !estadoActual;
 },
         modificar(ventana, metodo, data){
             this.$refs[ventana][metodo](data);
         }
-    },
-   
+    }
+  
 }).mount("#app");
