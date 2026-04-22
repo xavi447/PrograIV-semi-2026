@@ -1,11 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AlumnoController;
-use App\Http\Controllers\DocenteController;
-use App\Http\Controllers\MateriaController;
-use App\Http\Controllers\MatriculaController;
-use App\Http\Controllers\InscripcionController;
+use App\Http\Controllers\MantenimientoController;
+use App\Http\Controllers\ReporteFallaController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -21,36 +19,20 @@ use App\Http\Controllers\InscripcionController;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/bienvenida/{nombre}', function ($nombre) {
-    return '<h1>Bienvenido a mi pagina, hola '.$nombre.', como estas...</h1>';
+
+Route::controller(MantenimientoController::class)->group(function () {
+   Route::get('/mantenimiento', [MantenimientoController::class, 'index']);
+Route::post('/mantenimiento', [MantenimientoController::class, 'store']);
+Route::put('/mantenimiento/{id}', [MantenimientoController::class, 'update']);
+Route::delete('/mantenimiento', [MantenimientoController::class, 'destroy']);
 });
-Route::controller(AlumnoController::class)->group(function () {
-    Route::get('/alumno', 'index');
-    Route::post('/alumno', 'store');
-    Route::put('/alumno', 'update');
-    Route::delete('/alumno', 'destroy');
+
+Route::controller(ReporteFallaController::class)->group(function () {
+    Route::get('/reporte-falla', 'index');
+    Route::post('/reporte-falla', 'store');
+    Route::put('/reporte-falla', 'update');
+    Route::delete('/reporte-falla', 'destroy');
 });
-Route::controller(DocenteController::class)->group(function () {
-    Route::get('/docente', 'index');
-    Route::post('/docente', 'store');
-    Route::put('/docente', 'update');
-    Route::delete('/docente', 'destroy');
-});
-Route::controller(MateriaController::class)->group(function () {
-    Route::get('/materia', 'index');
-    Route::post('/materia', 'store');
-    Route::put('/materia', 'update');
-    Route::delete('/materia', 'destroy');
-});
-Route::controller(MatriculaController::class)->group(function () {
-    Route::get('/matricula', 'index');
-    Route::post('/matricula', 'store');
-    Route::put('/matricula', 'update');
-    Route::delete('/matricula', 'destroy');
-});
-Route::controller(InscripcionController::class)->group(function () {
-    Route::get('/inscripcion', 'index');
-    Route::post('/inscripcion', 'store');
-    Route::put('/inscripcion', 'update');
-    Route::delete('/inscripcion', 'destroy');
+Route::get('/prueba', function () {
+    return "ESTE ES EL PROYECTO CORRECTO 🔥";
 });

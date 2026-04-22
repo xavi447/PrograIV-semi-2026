@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>::. Sistema Academico ..::</title>
+        <title>::. Sistema de Mantenimientos ..::</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -20,36 +20,25 @@
     </head>
     <body class="antialiased">
         <div id="appSistema">
-            <nav class="navbar navbar-expand-lg bg-light">
+            <nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
                 <div class="container-fluid">
-                    <a class="navbar-brand" href="#">::.. SISTEMA ACADEMICO ..::</a>
+                    <a class="navbar-brand" href="#">::.. SISTEMA DE MANTENIMIENTOS ..::</a>
                     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                         <div class="navbar-nav">
-                            <a class="nav-link" href="#" @click="abrirVentana('alumnos')">Alumnos</a>
-                            <a class="nav-link" href="#" @click="abrirVentana('materias')">Materias</a>
-                            <a class="nav-link" href="#" @click="abrirVentana('docentes')">Docentes</a>
-                            <a class="nav-link" href="#" @click="abrirVentana('matriculas')">Matriculas</a>
-                            <a class="nav-link" href="#" @click="abrirVentana('inscripciones')">Inscripciones</a>
-                            <a class="nav-link" href="#" @click="hacerBackup()">Backup</a>
+                            <a class="nav-link" href="#" @click="abrirVentana('mantenimientos')">Registro Mantenimientos</a>
+                            <a class="nav-link" href="#" @click="abrirVentana('buscar_mantenimientos')">Ver Mantenimientos</a>
+                            <a class="nav-link" href="#" @click="abrirVentana('reportes')">Reportar Falla</a>
+                            <a class="nav-link" href="#" @click="abrirVentana('buscar_reportes')">Ver Reportes</a>
                         </div>
                     </div>
                 </div>
             </nav>
-            <div class="container-fluid" style="position: absolute; min-height: 80vh;">
-                <alumnos @buscar='buscar("buscar_alumnos","obtenerAlumnos")' :forms="forms" ref="alumnos" v-show="forms.alumnos.mostrar"></alumnos>
-                <buscar_alumnos @modificar='modificar("alumnos","modificarAlumno", $event)' :forms="forms" ref="buscar_alumnos" v-show="forms.buscar_alumnos.mostrar"></buscar_alumnos>
+            <div class="container-fluid" style="position: relative; min-height: 80vh; padding-top: 20px;">
+                <mantenimientos @buscar='buscar("buscar_mantenimientos","obtenerMantenimientos")' :forms="forms" ref="mantenimientos" v-show="forms.mantenimientos.mostrar"></mantenimientos>
+                <buscar_mantenimientos @modificar='modificar("mantenimientos","modificarMantenimiento", $event)' :forms="forms" ref="buscar_mantenimientos" v-show="forms.buscar_mantenimientos.mostrar"></buscar_mantenimientos>
 
-                <docentes @buscar='buscar("buscar_docentes","obtenerDocentes")' :forms="forms" ref="docentes" v-show="forms.docentes.mostrar"></docentes>
-                <buscar_docentes @modificar='modificar("docentes","modificarDocente", $event)' :forms="forms" ref="buscar_docentes" v-show="forms.buscar_docentes.mostrar"></buscar_docentes>
-
-                <materias @buscar='buscar("buscar_materias","obtenerMaterias")' :forms="forms" ref="materias" v-show="forms.materias.mostrar"></materias>
-                <buscar_materias @modificar='modificar("materias","modificarMateria", $event)' :forms="forms" ref="buscar_materias" v-show="forms.buscar_materias.mostrar"></buscar_materias>
-
-                <matriculas @buscar='buscar("buscar_matriculas","obtenerMatriculas")' :forms="forms" ref="matriculas" v-show="forms.matriculas.mostrar"></matriculas>
-                <buscar_matriculas @modificar='modificar("matriculas","modificarMatricula", $event)' :forms="forms" ref="buscar_matriculas" v-show="forms.buscar_matriculas.mostrar"></buscar_matriculas>
-
-                <inscripciones @buscar='buscar("buscar_inscripciones","obtenerInscripciones")' :forms="forms" ref="inscripciones" v-show="forms.inscripciones.mostrar"></inscripciones>
-                <buscar_inscripciones @modificar='modificar("inscripciones","modificarInscripcion", $event)' :forms="forms" ref="buscar_inscripciones" v-show="forms.buscar_inscripciones.mostrar"></buscar_inscripciones>
+                <reportes @buscar='buscar("buscar_reportes","obtenerReportes")' :forms="forms" ref="reportes" v-show="forms.reportes.mostrar"></reportes>
+                <buscar_reportes @modificar='modificar("reportes","modificarReporte", $event)' :forms="forms" ref="buscar_reportes" v-show="forms.buscar_reportes.mostrar"></buscar_reportes>
 
             </div>
         </div>
