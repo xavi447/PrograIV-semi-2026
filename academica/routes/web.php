@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AlumnoController;
+use App\Http\Controllers\DocenteController;
+use App\Http\Controllers\MateriaController;
+use App\Http\Controllers\MatriculaController;
+use App\Http\Controllers\InscripcionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,4 +29,28 @@ Route::controller(AlumnoController::class)->group(function () {
     Route::post('/alumno', 'store');
     Route::put('/alumno', 'update');
     Route::delete('/alumno', 'destroy');
+});
+Route::controller(DocenteController::class)->group(function () {
+    Route::get('/docente', 'index');
+    Route::post('/docente', 'store');
+    Route::put('/docente', 'update');
+    Route::delete('/docente', 'destroy');
+});
+Route::controller(MateriaController::class)->group(function () {
+    Route::get('/materia', 'index');
+    Route::post('/materia', 'store');
+    Route::put('/materia', 'update');
+    Route::delete('/materia', 'destroy');
+});
+Route::controller(MatriculaController::class)->group(function () {
+    Route::get('/matricula', 'index');
+    Route::post('/matricula', 'store');
+    Route::put('/matricula', 'update');
+    Route::delete('/matricula', 'destroy');
+});
+Route::controller(InscripcionController::class)->group(function () {
+    Route::get('/inscripcion', 'index');
+    Route::post('/inscripcion', 'store');
+    Route::put('/inscripcion', 'update');
+    Route::delete('/inscripcion', 'destroy');
 });
