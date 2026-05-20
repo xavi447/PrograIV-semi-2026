@@ -2,25 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Alumno;
+use App\Models\Mantenimiento;
 use Illuminate\Http\Request;
 
-class AlumnoController extends Controller
+class MantenimientoController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return alumno::get();//mostrar todos los datos de alumnos
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return Mantenimiento::get();
     }
 
     /**
@@ -28,47 +20,30 @@ class AlumnoController extends Controller
      */
     public function store(Request $request)
     {
-        Alumno::create($request->all());
+        Mantenimiento::create($request->all());
         return response()->json(['msg'=>'ok'], 200);
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Alumno $alumno)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Alumno $alumno)
-    {
-        //
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Alumno $alumno)
+    public function update(Request $request)
     {
-        $alumno::where('idAlumno', $request->idAlumno)->update([
-            'codigo' => $request->codigo,
-            'nombre' => $request->nombre,
-            'direccion' => $request->direccion,
-            'email' => $request->email,
-            'telefono' => $request->telefono
+        Mantenimiento::where('idMantenimiento', $request->idMantenimiento)->update([
+            'fecha' => $request->fecha,
+            'encargado_mantenimiento' => $request->encargado_mantenimiento,
+            'nivel_falla' => $request->nivel_falla,
+            'estado' => $request->estado
         ]);
-        return response()->json(['msg'=>'ok', 'idAlumno'=>$request->idAlumno], 200);
+        return response()->json(['msg'=>'actualizado'], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, Alumno $alumno)
+    public function destroy(Request $request)
     {
-        $alumno::where('idAlumno', $request['idAlumno'])->delete();
-        return response()->json(['msg'=> 'ok', 'idAlumno'=>$request['idAlumno']], 200);
+        Mantenimiento::where('idMantenimiento', $request->idMantenimiento)->delete();
+        return response()->json(['msg'=>'eliminado'], 200);
     }
 }
